@@ -23,7 +23,7 @@ def contains_keywords(row):
 
 filtered_df = df[df.apply(contains_keywords, axis=1)]
 
-#3.
+#3.by year
 retain_columns = [
     'projectId', 'projectBatchName', 'projectName', 'projectBatchCount', 'projectBatchId',
     'projectType3Name', 'constructionContent', 'cityName', 'countyName',
@@ -105,7 +105,7 @@ def check_province_in_full(shp_name, full_name):
 gdf_provinces = gpd.read_file(china_shapefile_path)
 xls = pd.ExcelFile(excel_path)
 
-#6.1每个月的图
+#6.1 figure by month
 for sheet_name in xls.sheet_names:
     df_sheet = pd.read_excel(xls, sheet_name=sheet_name)
     gdf_provinces['bondInvest'] = 0
@@ -129,8 +129,8 @@ for sheet_name in xls.sheet_names:
         "CustomGreen", ["#a0f0a0", "#006400"])
 
     offsets = {
-        '河北': (-10000, -100000),
-        '天津': (15000, -10000),
+        'hebei': (-10000, -100000),
+        'tianjin': (15000, -10000),
     }
     fig, ax = plt.subplots(1, 1, figsize=(10, 10))
     gdf_provinces.plot(column='bondInvest', ax=ax, legend=True, cmap=light_green_to_dark, vmin=0, vmax=1e7)
@@ -145,13 +145,13 @@ for sheet_name in xls.sheet_names:
                      fontsize=6)
     plt.title(f'{sheet_name} Map')
 
-    output_path = os.path.join('E:/人大农发硕士/债券/photomonth/', f"{sheet_name}_map.png")
+    output_path = os.path.join('path', f"{sheet_name}_map.png")
     plt.savefig(output_path)
     plt.close()
-    print(f"{sheet_name}_map.png已保存")
-print("所有地图已成功保存为图片文件！")
+    print(f"{sheet_name}_map.png")
+print("done")
 
-#6.2累积图
+#6.2 cumulative bonds data
 province_invest_cumulative = dict.fromkeys(gdf_provinces['NAME'], 0)
 last_valid_data = None
 for sheet_name in xls.sheet_names:
@@ -184,8 +184,8 @@ for sheet_name in xls.sheet_names:
         "CustomGreen", ["#a0f0a0", "#006400"])
 
     offsets = {
-        '河北': (-10000, -100000),
-        '天津': (15000, -10000),
+        'heibei': (-10000, -100000),
+        'tianjin': (15000, -10000),
     }
     fig, ax = plt.subplots(1, 1, figsize=(10, 10))
     gdf_provinces.plot(column='bondInvest', ax=ax, legend=True, cmap=light_green_to_dark, vmin=0, vmax=1.7e7)
@@ -200,21 +200,21 @@ for sheet_name in xls.sheet_names:
                      fontsize=6)
     plt.title(f'Cumulative Investment Map - Up to {sheet_name}')
 
-    output_path = os.path.join('E:/人大农发硕士/债券/photobymonth/', f"Cumulative_{sheet_name}_map.png")
+    output_path = os.path.join('path', f"Cumulative_{sheet_name}_map.png")
     plt.savefig(output_path)
     plt.close()
     print(sheet_name)
 
-print("所有累积地图已成功保存为图片文件！")
+print("done")
 
-#6.3合成动图
-images_folder = 'E:/人大农发硕士/债券/photobymonth/'
+#6.3 GIF
+images_folder = 'path'
 images_files = sorted(
     [img for img in os.listdir(images_folder) if img.endswith(".png")]
 )
-with imageio.get_writer('E:/人大农发硕士/债券/photobymonth/mygif.gif', mode='I', duration=100) as writer:
+with imageio.get_writer('path', mode='I', duration=100) as writer:
     for filename in images_files:
         image_path = os.path.join(images_folder, filename)
         image = imageio.v3.imread(image_path)
         writer.append_data(image)
-print("GIF动图已创建完成！")
+print("done")
