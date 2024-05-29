@@ -10,12 +10,11 @@ all_data_frames = []
 url = 'the url of special bonds that will be scraped(actually in this context, it is not a url'
 
 headers = {
-    hidden
     pay attention to the formate
 }
 
 post_data ={
-    for-example(can be found in the payload)
+    for example(can be found in the payload)
     "regions": [],
     "city": None,
     "county": None,
@@ -24,7 +23,6 @@ post_data ={
 }
 
 base_headers = {
-    hidden
     pay attention to the formate
 }
 
