@@ -8,14 +8,14 @@ import imageio
 from matplotlib.colors import LinearSegmentedColormap
 plt.rcParams['font.sans-serif'] = ['SimHei']
 plt.rcParams['axes.unicode_minus'] = False
-excel_path = 'E:/人大农发硕士/债券/sorted_by_month.xlsx'
-china_shapefile_path = 'C:/Users/14470/Desktop/积分制文字与展示/地图/2022审图号中国地图/省级行政区.shp'
+excel_path = 'path'
+china_shapefile_path = 'shp'
 
-#1.导入
-df = pd.read_csv('E:/人大农发硕士/债券/final_combined_data.csv', low_memory=False)
+#1.import
+df = pd.read_csv('data', low_memory=False)
 
-#2.筛选：根据项目名和项目类别
-keywords = ["乡村振兴", "农业", "农林水利", "农村", "乡村", "农产品", "粮食"]
+#2.classify
+keywords = [distinct words]
 
 def contains_keywords(row):
     return any(keyword in str(row['projectType3Name']) for keyword in keywords) or \
@@ -23,7 +23,7 @@ def contains_keywords(row):
 
 filtered_df = df[df.apply(contains_keywords, axis=1)]
 
-#3.按时间顺序分离及写入
+#3.
 retain_columns = [
     'projectId', 'projectBatchName', 'projectName', 'projectBatchCount', 'projectBatchId',
     'projectType3Name', 'constructionContent', 'cityName', 'countyName',
@@ -55,7 +55,7 @@ for _, row in filtered_df.iterrows():
 
 new_df = pd.DataFrame(new_rows)
 
-#4.描述性统计
+#4.descriptive statistics
 numeric_columns = new_df.select_dtypes(include=[np.number]).columns.tolist()
 
 def generate_descriptive_stats_md(df, numeric_cols, filepath):
@@ -78,19 +78,19 @@ def generate_counts_md(df, column, filepath):
         f.write(markdown_text)
     return filepath
 
-descriptive_stats_md_path = generate_descriptive_stats_md(new_df, numeric_columns, 'E:/人大农发硕士/债券/descriptive_stats.md')
-project_type_counts_md_path = generate_counts_md(new_df, 'projectType3Name', 'E:/人大农发硕士/债券/project_type_counts.md')
-city_name_counts_md_path = generate_counts_md(new_df, 'cityName', 'E:/人大农发硕士/债券/city_name_counts.md')
+descriptive_stats_md_path = generate_descriptive_stats_md(new_df, numeric_columns, 'md')
+project_type_counts_md_path = generate_counts_md(new_df, 'projectType3Name', 'md')
+city_name_counts_md_path = generate_counts_md(new_df, 'cityName', 'md')
 
-#5.按时间顺序进行分组、写入excel
+#5.excel
 new_df['firstPublishDate'] = pd.to_datetime(new_df['firstPublishDate'], errors='coerce')
 new_df['YearMonth'] = new_df['firstPublishDate'].dt.to_period('M').astype(str)
 
-with pd.ExcelWriter('E:/人大农发硕士/债券/grouped_by_month.xlsx') as writer:
+with pd.ExcelWriter('xlsx') as writer:
     for name, group in new_df.groupby('YearMonth'):
         group.to_excel(writer, sheet_name=name, index=False)
 
-#6.画图
+#6.figures
 def parse_province(city_name,bond_name):
     if pd.isna(city_name) or city_name.strip() == '' or jio.parse_location(city_name).get('province') == None :
         location_info = jio.parse_location(bond_name)
