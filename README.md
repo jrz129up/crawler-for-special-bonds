@@ -1,11 +1,14 @@
 # Crawler-for-special-bonds
-## Example
+## Introduction
 json format in a dynamic table. 
 only a sample for the code, data and descriptive analysis without key information including headers, partly essential logic
 the purpose is to represent some working achievements
 
 ## Data
-在render存在一定问题的前提下通过循环尽可能地获取无重复值，爬取完成后，原始数据共99240条.
+In the case of rendering issues, a total of 99240 original data entries were obtained by iteratively retrieving non-repetitive values as much as possible during the crawling process.
 
 ### Visualizing
 Figures with geographic features are in the file named 'photos'.
+
+### NLP
+Using the NLP to classify bonds. Refer to NLP.
