@@ -1,0 +1,75 @@
+def main():
+    df = pd.read_csv('csv', low_memory=False)
+
+    keywords = [distinct words]
+
+    def contains_keywords(row):
+        return any(keyword in str(row['projectType3Name']) for keyword in keywords) or \
+               any(keyword in str(row['projectName']) for keyword in keywords)
+
+    filtered_df = df[df.apply(contains_keywords, axis=1)].copy()
+
+    def load_stopwords(path):
+        with open(path, 'r', encoding='utf-8') as f:
+            stopwords = [line.strip() for line in f.readlines()]
+        return stopwords
+
+    stopwords = load_stopwords('txt')
+
+    def preprocess_text(text):
+        text = str(text).strip()
+        if text == '' or text.lower() == 'nan':
+            return []
+        words = jieba.cut(text)
+        words_filtered = []
+        count = 0
+        for word in words:
+            if word not in stopwords and word.strip() != '':
+                words_filtered.append(word)
+            count += 1
+            if count % 1000 == 0:
+                print(f"已处理 {count} 个词")
+        return words_filtered
+
+    print("begin")
+    filtered_df['processed_text'] = filtered_df['sourceIncome'].apply(preprocess_text)
+
+    texts = filtered_df['processed_text'].tolist()#
+    dictionary = corpora.Dictionary(texts)
+    corpus = [dictionary.doc2bow(text) for text in texts]
+    for k in range(2,7):
+        lda_model = models.LdaMulticore(corpus, num_topics=k, id2word=dictionary, passes=10, workers=2)
+
+        for i, topic in lda_model.print_topics(num_words=8-k):
+            print(f"主题{i}: {topic}")
+
+        filtered_df['Topic'] = [max(lda_model[doc], key=lambda x: x[1])[0] for doc in corpus]
+
+        filtered_df.to_csv(f'csv', encoding='utf-8', index=False)
+        topic_assignments = [max(lda_model[doc], key=lambda x: x[1])[0] for doc in corpus]
+        filtered_df[f'Topic_{k}'] = topic_assignments
+
+        topic_weights = []
+        for i, row_list in enumerate(lda_model[corpus]):
+            row = [0] * k
+            for (topic_num, prop_topic) in row_list:
+                row[topic_num] = prop_topic
+            topic_weights.append(row)
+
+        arr = pd.DataFrame(topic_weights).fillna(0).values
+        tsne_model = TSNE(n_components=2, verbose=1, random_state=0, angle=.5, init='pca')
+        tsne_lda = tsne_model.fit_transform(arr)
+
+        fig, ax = plt.subplots(figsize=(12, 6))
+        cmap = mcolors.LinearSegmentedColormap.from_list("custom_green", ["lightgreen", "darkgreen"], N=k)
+        scatter = ax.scatter(x=tsne_lda[:, 0], y=tsne_lda[:, 1], c=topic_assignments, cmap=cmap)
+        ax.set_xlabel('特征1')
+        ax.set_ylabel('特征2')
+        ax.set_title(f'主题聚类：{k}主题')
+        plt.colorbar(scatter, ax=ax)
+        plt.savefig(f'png')
+        plt.show()
+
+
+if __name__ == '__main__':
+    main()
